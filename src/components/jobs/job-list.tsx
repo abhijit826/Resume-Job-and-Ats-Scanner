@@ -3,7 +3,7 @@ import JobCard from './job-card';
 import type { RecommendedJob, DisplayableJob } from '@/types';
 
 interface JobListProps {
-  jobs: RecommendedJob[]; // Specifically for recommended jobs which include matchReason
+  jobs: RecommendedJob[]; 
   savedJobIds: string[];
   onSaveToggle: (jobId: string) => void;
 }
@@ -16,10 +16,9 @@ export default function JobList({ jobs, savedJobIds, onSaveToggle }: JobListProp
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {jobs.map((job, index) => {
-        // Adapt RecommendedJob to DisplayableJob for JobCard
         const displayableJob: DisplayableJob = {
-          ...job, // Includes id, title, company, location, matchReason
-          // Potentially map companyLogo if available, or add a default
+          ...job, 
+          applicationUrl: job.applicationUrl, // Ensure applicationUrl is passed
         };
         return (
           <div

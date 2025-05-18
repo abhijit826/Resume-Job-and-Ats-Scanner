@@ -23,12 +23,11 @@ export default function CareerCompassPage() {
 
   const { savedJobIds, addSavedJob, removeSavedJob, isJobSaved, isInitialized } = useSavedJobs();
 
-  // Prepare all available jobs with client-side IDs once.
   const allJobsWithIds = useMemo(() => {
     return mockJobOpenings.map(job => ({
       ...job,
-      // Ensure ID is consistently generated if not present or make it stable
-      id: job.id || `${job.company}-${job.title}`.replace(/\s+/g, '-').toLowerCase()
+      id: job.id || `${job.company}-${job.title}`.replace(/\s+/g, '-').toLowerCase(),
+      applicationUrl: job.applicationUrl, // Ensure applicationUrl is carried over
     }));
   }, []);
 
@@ -41,12 +40,11 @@ export default function CareerCompassPage() {
   const handleRecommendations = (jobs: MatchJobsOutput) => {
     const jobsWithClientIds = jobs.map((job, index) => ({
       ...job,
-      // Generate a unique ID for each recommendation for consistent keying and saving
-      // This assumes AI output (title, company) + index can be somewhat unique for this session
-      id: `${job.company}-${job.title}-${index}`.replace(/\s+/g, '-').toLowerCase()
+      id: `${job.company}-${job.title}-${index}`.replace(/\s+/g, '-').toLowerCase(),
+      applicationUrl: job.applicationUrl, // Ensure applicationUrl from AI is carried over
     }));
     setRecommendedJobs(jobsWithClientIds);
-    setError(null); // Clear previous errors
+    setError(null); 
   };
 
   const handleSaveToggle = (jobId: string, jobTitle: string) => {
@@ -61,7 +59,6 @@ export default function CareerCompassPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-12">
-      {/* Resume Upload Section */}
       <section aria-labelledby="resume-upload-title">
         <div className="flex items-center space-x-3 mb-6">
           <UploadCloud className="w-10 h-10 text-primary" />
@@ -76,7 +73,7 @@ export default function CareerCompassPage() {
           onResults={handleRecommendations}
           setLoading={setIsLoading}
           setError={setError}
-          jobOpenings={allJobsWithIds as JobOpening[]} // Pass all mock jobs to the form for the AI
+          jobOpenings={allJobsWithIds as JobOpening[]} 
         />
       </section>
 
@@ -96,7 +93,6 @@ export default function CareerCompassPage() {
         </Alert>
       )}
 
-      {/* Job Recommendations Section */}
       {!isLoading && recommendedJobs.length > 0 && (
         <>
           <Separator />
@@ -126,7 +122,6 @@ export default function CareerCompassPage() {
       )}
 
 
-      {/* Saved Jobs Section */}
       {isInitialized && (
         <>
           <Separator />

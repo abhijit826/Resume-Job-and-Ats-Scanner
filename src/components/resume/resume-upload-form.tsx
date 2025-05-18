@@ -1,3 +1,4 @@
+// src/components/resume/resume-upload-form.tsx
 'use client';
 
 import { useState, type FormEvent, useRef } from 'react';
@@ -6,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { matchJobs, type MatchJobsInput, type MatchJobsOutput } from '@/ai/flows/match-jobs';
-import type { JobOpening } from '@/lib/mockData'; // Using JobOpening from mockData for type consistency
+import type { JobOpening } from '@/lib/mockData'; 
 import { UploadCloud } from 'lucide-react';
 
 interface ResumeUploadFormProps {
   onResults: (results: MatchJobsOutput) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  jobOpenings: JobOpening[]; // Pass the available job openings
+  jobOpenings: JobOpening[]; // Pass the available job openings (JobOpening type now includes applicationUrl)
 }
 
 export default function ResumeUploadForm({ onResults, setLoading, setError, jobOpenings }: ResumeUploadFormProps) {
@@ -38,7 +39,7 @@ export default function ResumeUploadForm({ onResults, setLoading, setError, jobO
         setFile(null);
         setFileName(null);
         if (fileInputRef.current) {
-          fileInputRef.current.value = ""; // Reset file input
+          fileInputRef.current.value = ""; 
         }
       }
     }
@@ -64,12 +65,12 @@ export default function ResumeUploadForm({ onResults, setLoading, setError, jobO
       reader.onload = async () => {
         const resumeDataUri = reader.result as string;
         
-        // Prepare job openings for the AI flow (AI expects title, company, location, description)
         const aiJobOpenings = jobOpenings.map(job => ({
             title: job.title,
             company: job.company,
             location: job.location,
             description: job.description,
+            applicationUrl: job.applicationUrl, // Pass the application URL
         }));
 
         const input: MatchJobsInput = { resumeDataUri, jobOpenings: aiJobOpenings };

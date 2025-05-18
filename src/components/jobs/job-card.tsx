@@ -2,9 +2,10 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bookmark, Building2, MapPin } from "lucide-react";
+import { Bookmark, Building2, MapPin, ExternalLink } from "lucide-react";
 import type { DisplayableJob } from '@/types';
 
 interface JobCardProps {
@@ -47,7 +48,7 @@ export default function JobCard({ job, isSaved, onSaveToggle }: JobCardProps) {
           {job.matchReason || job.description || 'No further details available.'}
         </CardDescription>
       </CardContent>
-      <CardFooter className="pt-4">
+      <CardFooter className="pt-4 flex flex-col sm:flex-row gap-2">
         <Button
           variant={isSaved ? "secondary" : "default"}
           onClick={() => onSaveToggle(job.id)}
@@ -57,6 +58,14 @@ export default function JobCard({ job, isSaved, onSaveToggle }: JobCardProps) {
           <Bookmark className={`w-4 h-4 mr-2 ${isSaved ? 'fill-primary' : ''}`} />
           {isSaved ? 'Unsave Job' : 'Save Job'}
         </Button>
+        {job.applicationUrl && (
+          <Button asChild variant="outline" className="w-full">
+            <Link href={job.applicationUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Apply Now
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

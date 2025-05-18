@@ -25,6 +25,7 @@ const MatchJobsInputSchema = z.object({
       company: z.string().describe('The company name'),
       location: z.string().describe('The job location'),
       description: z.string().describe('The job description'),
+      applicationUrl: z.string().url().optional().describe('The direct URL to apply for the job, if available.'),
     })
   ).describe('A list of job opening objects to consider for matching.'),
 });
@@ -37,8 +38,9 @@ const MatchJobsOutputSchema = z.array(
     company: z.string().describe('The company name'),
     location: z.string().describe('The job location'),
     matchReason: z.string().describe('The reason why this job is a good match.'),
+    applicationUrl: z.string().url().optional().describe('The direct URL to apply for the job, if available.'),
   })
-).describe('A list of recommended jobs with reasons for the match.');
+).describe('A list of recommended jobs with reasons for the match and application URLs if available.');
 export type MatchJobsOutput = z.infer<typeof MatchJobsOutputSchema>;
 
 // Exported function to call the flow
@@ -64,16 +66,20 @@ const matchJobsPrompt = ai.definePrompt({
   Company: {{company}}
   Location: {{location}}
   Description: {{description}}
+  {{#if applicationUrl}}Application URL: {{applicationUrl}}{{/if}}
   ---
   {{/each}}
 
-  Provide a list of recommended jobs, including the title, company, location, and a brief explanation of why each job is a good match for the candidate. Only include jobs that are a strong match.
+  Provide a list of recommended jobs, including the title, company, location, and a brief explanation of why each job is a good match for the candidate.
+  If an application URL was provided for a job opening, include that URL in the recommendation.
+  Only include jobs that are a strong match.
 
   Format your response as a JSON array of objects with the following keys:
   - title (string): The job title.
   - company (string): The company name.
   - location (string): The job location.
   - matchReason (string): A brief explanation of why the job is a good match.
+  - applicationUrl (string, optional): The direct URL to apply for the job, if one was provided in the input.
   `,
 });
 
