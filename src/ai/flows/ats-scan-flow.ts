@@ -12,7 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const AtsScanInputSchema = z.object({
+const AtsScanInputSchema = z.object({
   resumeDataUri: z
     .string()
     .describe(
@@ -22,7 +22,7 @@ export const AtsScanInputSchema = z.object({
 });
 export type AtsScanInput = z.infer<typeof AtsScanInputSchema>;
 
-export const AtsScanOutputSchema = z.object({
+const AtsScanOutputSchema = z.object({
   overallFit: z
     .string()
     .describe(
@@ -94,3 +94,4 @@ const atsScanFlow = ai.defineFlow(
     return output;
   }
 );
+
