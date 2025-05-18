@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, type FormEvent, useRef } from 'react';
+import { useState, type FormEvent, useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,9 +13,30 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { CheckCircle, AlertTriangle, Info, ArrowRight, Sparkles, UploadCloud, FileText, Target, BarChart2, ThumbsUp, Lightbulb, ListChecks, Percent } from 'lucide-react';
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { CheckCircle, AlertTriangle, Info, ArrowRight, Sparkles, UploadCloud, FileText, Target, BarChart2, ThumbsUp, Lightbulb, ListChecks, Percent, PieChartIcon, LineChartIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+
+
+const CHART_COLORS_LIGHT = {
+  matched: 'hsl(var(--primary))', // Blue
+  missing: 'hsl(var(--destructive))', // Red
+  other: 'hsl(var(--muted))', // Grey for pie chart
+  scoreLine: 'hsl(var(--primary))',
+  grid: 'hsl(var(--border))',
+  text: 'hsl(var(--foreground))',
+};
+
+const CHART_COLORS_DARK = {
+  matched: 'hsl(var(--primary))', // Blue (can be same or adjusted for dark)
+  missing: 'hsl(var(--destructive))', // Red (can be same or adjusted for dark)
+  other: 'hsl(var(--muted))', // Darker Grey for pie chart
+  scoreLine: 'hsl(var(--primary))',
+  grid: 'hsl(var(--border))', // Darker border
+  text: 'hsl(var(--foreground))', // Lighter text
+};
+
 
 export default function AtsScannerForm() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -26,6 +47,14 @@ export default function AtsScannerForm() {
   const [results, setResults] = useState<AtsScanOutput | null>(null);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { theme } = useTheme();
+  const [currentChartColors, setCurrentChartColors] = useState(CHART_COLORS_LIGHT);
+
+  useEffect(() => {
+    setCurrentChartColors(theme === 'dark' ? CHART_COLORS_DARK : CHART_COLORS_LIGHT);
+  }, [theme]);
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -108,9 +137,19 @@ export default function AtsScannerForm() {
     }
   };
   
-  const keywordChartData = results ? [
+  const keywordBarChartData = results ? [
     { name: 'Keywords', Matched: results.keywordStats.matchedKeywordsCount, Missing: results.keywordStats.missingKeywordsCount },
   ] : [];
+
+  const keywordPieChartData = results ? [
+    { name: 'Matched Keywords', value: results.keywordStats.matchedKeywordsCount },
+    { name: 'Missing Keywords', value: results.keywordStats.missingKeywordsCount },
+  ] : [];
+  
+  const overallScoreLineData = results ? [
+    { name: 'Overall Score', score: results.overallScore }
+  ] : [];
+
 
   return (
     <div className="space-y-10">
@@ -182,7 +221,7 @@ export default function AtsScannerForm() {
       {results && !isLoading && (
         <div className="space-y-8">
           <Card className="shadow-xl border-border overflow-hidden">
-            <CardHeader className="bg-muted/30 border-b">
+            <CardHeader className="bg-muted/30 border-b dark:bg-muted/20">
               <CardTitle className="text-2xl font-semibold text-foreground flex items-center">
                 <Target className="w-7 h-7 mr-3 text-primary" />
                 Overall Match Assessment
@@ -200,10 +239,23 @@ export default function AtsScannerForm() {
               </div>
               <Progress value={results.overallScore} className="h-3" />
             </CardContent>
+             <CardFooter className="p-6">
+                <div className="w-full h-[100px]">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={overallScoreLineData} margin={{ top: 5, right: 20, left: -30, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={currentChartColors.grid}/>
+                      <XAxis dataKey="name" stroke={currentChartColors.text} />
+                      <YAxis domain={[0, 100]} stroke={currentChartColors.text} />
+                      <Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? 'hsl(var(--popover))' : 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', borderRadius: '0.5rem', borderColor: 'hsl(var(--border))' }} />
+                      <Line type="monotone" dataKey="score" stroke={currentChartColors.scoreLine} strokeWidth={3} dot={{ r: 5, fill: currentChartColors.scoreLine }} activeDot={{ r: 7 }} name="Overall Score"/>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+            </CardFooter>
           </Card>
 
           <Card className="shadow-xl border-border overflow-hidden">
-            <CardHeader className="bg-muted/30 border-b">
+            <CardHeader className="bg-muted/30 border-b dark:bg-muted/20">
               <CardTitle className="text-xl font-semibold text-foreground flex items-center">
                 <BarChart2 className="w-6 h-6 mr-3 text-primary" />
                 Keyword Analysis
@@ -213,46 +265,70 @@ export default function AtsScannerForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-              <div className="h-[200px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={keywordChartData} margin={{ top: 5, right: 0, left: -25, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.5} />
-                    <XAxis dataKey="name" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip
-                        content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                            return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
-                                <div className="grid grid-cols-2 gap-2">
-                                <div className="flex flex-col">
-                                    <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                    Matched
-                                    </span>
-                                    <span className="font-bold text-foreground">
-                                    {payload[0].value}
-                                    </span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                    Missing
-                                    </span>
-                                    <span className="font-bold text-destructive">
-                                    {payload[1].value}
-                                    </span>
-                                </div>
-                                </div>
-                            </div>
-                            )
-                        }
-                        return null
-                        }}
-                    />
-                    <Legend />
-                    <Bar dataKey="Matched" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Missing" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                <div className="h-[250px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={keywordBarChartData} margin={{ top: 5, right: 0, left: -25, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.5} stroke={currentChartColors.grid} />
+                      <XAxis dataKey="name" stroke={currentChartColors.text}/>
+                      <YAxis allowDecimals={false} stroke={currentChartColors.text}/>
+                      <Tooltip
+                          contentStyle={{ backgroundColor: theme === 'dark' ? 'hsl(var(--popover))' : 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', borderRadius: '0.5rem', borderColor: 'hsl(var(--border))' }}
+                          content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                              return (
+                              <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                  <div className="grid grid-cols-2 gap-2">
+                                  <div className="flex flex-col">
+                                      <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                      Matched
+                                      </span>
+                                      <span className="font-bold text-foreground">
+                                      {payload[0].value}
+                                      </span>
+                                  </div>
+                                  <div className="flex flex-col">
+                                      <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                      Missing
+                                      </span>
+                                      <span className="font-bold text-destructive">
+                                      {payload[1].value}
+                                      </span>
+                                  </div>
+                                  </div>
+                              </div>
+                              )
+                          }
+                          return null
+                          }}
+                      />
+                      <Legend wrapperStyle={{ color: currentChartColors.text }} />
+                      <Bar dataKey="Matched" fill={currentChartColors.matched} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Missing" fill={currentChartColors.missing} radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="h-[250px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={keywordPieChartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        <Cell key={`cell-matched`} fill={currentChartColors.matched} />
+                        <Cell key={`cell-missing`} fill={currentChartColors.missing} />
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? 'hsl(var(--popover))' : 'hsl(var(--popover))', color: 'hsl(var(--popover-foreground))', borderRadius: '0.5rem', borderColor: 'hsl(var(--border))' }} />
+                      <Legend wrapperStyle={{ color: currentChartColors.text }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -261,13 +337,13 @@ export default function AtsScannerForm() {
                     Matching Keywords ({results.matchingKeywords.length})
                   </h4>
                   {results.matchingKeywords.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 p-3 bg-secondary/50 rounded-md max-h-40 overflow-y-auto">
+                    <div className="flex flex-wrap gap-2 p-3 bg-secondary/50 dark:bg-secondary/30 rounded-md max-h-40 overflow-y-auto">
                       {results.matchingKeywords.map((keyword, index) => (
-                        <Badge key={index} variant="outline" className="border-green-500/70 text-green-700 bg-green-500/10 text-xs">{keyword}</Badge>
+                        <Badge key={index} variant="outline" className="border-green-500/70 text-green-700 dark:text-green-400 bg-green-500/10 dark:bg-green-500/20 text-xs">{keyword}</Badge>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground p-3 bg-secondary/50 rounded-md text-sm">No specific keywords matched.</p>
+                    <p className="text-muted-foreground p-3 bg-secondary/50 dark:bg-secondary/30 rounded-md text-sm">No specific keywords matched.</p>
                   )}
                 </div>
                 <div>
@@ -276,25 +352,25 @@ export default function AtsScannerForm() {
                     Missing Keywords ({results.missingKeywords.length})
                   </h4>
                   {results.missingKeywords.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 p-3 bg-secondary/50 rounded-md max-h-40 overflow-y-auto">
+                    <div className="flex flex-wrap gap-2 p-3 bg-secondary/50 dark:bg-secondary/30 rounded-md max-h-40 overflow-y-auto">
                       {results.missingKeywords.map((keyword, index) => (
-                        <Badge key={index} variant="outline" className="border-amber-500/70 text-amber-700 bg-amber-500/10 text-xs">{keyword}</Badge>
+                        <Badge key={index} variant="outline" className="border-amber-500/70 text-amber-700 dark:text-amber-400 bg-amber-500/10 dark:bg-amber-500/20 text-xs">{keyword}</Badge>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground p-3 bg-secondary/50 rounded-md text-sm">Great! No significant keywords appear to be missing.</p>
+                    <p className="text-muted-foreground p-3 bg-secondary/50 dark:bg-secondary/30 rounded-md text-sm">Great! No significant keywords appear to be missing.</p>
                   )}
                 </div>
               </div>
             </CardContent>
-             <CardFooter className="text-xs text-muted-foreground p-4 border-t">
+             <CardFooter className="text-xs text-muted-foreground p-4 border-t dark:border-border/50">
                 Identified {results.keywordStats.totalKeywordsInJobDescription} important keywords in the job description.
              </CardFooter>
           </Card>
 
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="shadow-xl border-border">
-              <CardHeader>
+              <CardHeader className="bg-muted/30 dark:bg-muted/20">
                 <CardTitle className="text-xl font-semibold text-foreground flex items-center">
                   <ThumbsUp className="w-6 h-6 mr-3 text-primary" />
                   Strengths Analysis
@@ -306,7 +382,7 @@ export default function AtsScannerForm() {
             </Card>
 
             <Card className="shadow-xl border-border">
-              <CardHeader>
+              <CardHeader className="bg-muted/30 dark:bg-muted/20">
                 <CardTitle className="text-xl font-semibold text-foreground flex items-center">
                   <Lightbulb className="w-6 h-6 mr-3 text-primary" />
                   Improvement Suggestions

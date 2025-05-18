@@ -2,6 +2,7 @@
 import { Briefcase, FileText, Home } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { ThemeToggleButton } from './theme-toggle-button';
 
 export default function Header() {
   return (
@@ -14,24 +15,23 @@ export default function Header() {
               CareerCompass
             </h1>
           </Link>
-          <nav className="flex items-center space-x-2 sm:space-x-4">
-            <Button variant="ghost" asChild>
+          <nav className="flex items-center space-x-1 sm:space-x-2">
+            <Button variant="ghost" asChild className="px-2 sm:px-3">
               <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                 <Home className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Job Matching</span>
               </Link>
             </Button>
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="px-2 sm:px-3">
               <Link href="/ats-scanner" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                 <FileText className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">ATS Scan</span>
               </Link>
             </Button>
+            <ThemeToggleButton />
           </nav>
         </div>
       </div>
     </header>
   );
 }
-
-    
