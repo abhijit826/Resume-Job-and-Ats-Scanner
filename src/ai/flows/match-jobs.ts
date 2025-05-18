@@ -25,7 +25,7 @@ const MatchJobsInputSchema = z.object({
       company: z.string().describe('The company name'),
       location: z.string().describe('The job location'),
       description: z.string().describe('The job description'),
-      applicationUrl: z.string().url().optional().describe('The direct URL to apply for the job, if available.'),
+      applicationUrl: z.string().optional().describe('The direct URL to apply for the job, if available.'),
     })
   ).describe('A list of job opening objects to consider for matching.'),
 });
@@ -38,7 +38,7 @@ const MatchJobsOutputSchema = z.array(
     company: z.string().describe('The company name'),
     location: z.string().describe('The job location'),
     matchReason: z.string().describe('The reason why this job is a good match.'),
-    applicationUrl: z.string().url().optional().describe('The direct URL to apply for the job, if available.'),
+    applicationUrl: z.string().optional().describe('The direct URL to apply for the job, if available.'),
   })
 ).describe('A list of recommended jobs with reasons for the match and application URLs if available.');
 export type MatchJobsOutput = z.infer<typeof MatchJobsOutputSchema>;
@@ -95,3 +95,4 @@ const matchJobsFlow = ai.defineFlow(
     return output!;
   }
 );
+
