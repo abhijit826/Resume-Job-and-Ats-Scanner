@@ -12,7 +12,7 @@ export default function AppLayout({
         {children}
       </main>
       <footer className="py-6 text-center text-muted-foreground text-sm border-t border-border mt-auto">
-        © {new Date().getFullYear()} CareerCompass. All rights reserved.
+      Made By-Abhijit Ranjan   © {new Date().getFullYear()} CareerCompass. All rights reserved.
       </footer>
     </div>
   );
