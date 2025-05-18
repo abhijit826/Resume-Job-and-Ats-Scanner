@@ -1,9 +1,11 @@
-import { Briefcase } from 'lucide-react';
+
+import { Briefcase, FileText, Home } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function Header() {
   return (
-    <header className="bg-card border-b border-border shadow-sm">
+    <header className="bg-card border-b border-border shadow-sm sticky top-0 z-40">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center space-x-3 group">
@@ -12,9 +14,24 @@ export default function Header() {
               CareerCompass
             </h1>
           </Link>
-          {/* Navigation items can be added here if needed */}
+          <nav className="flex items-center space-x-2 sm:space-x-4">
+            <Button variant="ghost" asChild>
+              <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                <Home className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Job Matching</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/ats-scanner" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                <FileText className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">ATS Scan</span>
+              </Link>
+            </Button>
+          </nav>
         </div>
       </div>
     </header>
   );
 }
+
+    
