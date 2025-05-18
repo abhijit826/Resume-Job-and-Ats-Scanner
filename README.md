@@ -1,5 +1,2 @@
-# Firebase Studio
-
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+# Career Compass
+Deployed link for Firebase-https://6000-firebase-studio-1747576614984.cluster-ikxjzjhlifcwuroomfkjrx437g.cloudworkstations.dev/
