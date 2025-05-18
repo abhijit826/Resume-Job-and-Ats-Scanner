@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -14,7 +15,7 @@ interface JobCardProps {
 
 export default function JobCard({ job, isSaved, onSaveToggle }: JobCardProps) {
   return (
-    <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg overflow-hidden">
+    <Card className="flex flex-col h-full shadow-lg hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 rounded-lg overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start space-x-4">
           {job.companyLogo ? (

@@ -1,3 +1,4 @@
+
 import JobCard from './job-card';
 import type { RecommendedJob, DisplayableJob } from '@/types';
 
@@ -14,19 +15,24 @@ export default function JobList({ jobs, savedJobIds, onSaveToggle }: JobListProp
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {jobs.map((job) => {
+      {jobs.map((job, index) => {
         // Adapt RecommendedJob to DisplayableJob for JobCard
         const displayableJob: DisplayableJob = {
           ...job, // Includes id, title, company, location, matchReason
           // Potentially map companyLogo if available, or add a default
         };
         return (
-          <JobCard
+          <div
             key={job.id}
-            job={displayableJob}
-            isSaved={savedJobIds.includes(job.id)}
-            onSaveToggle={onSaveToggle}
-          />
+            className="opacity-0 animate-fadeInUp"
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <JobCard
+              job={displayableJob}
+              isSaved={savedJobIds.includes(job.id)}
+              onSaveToggle={onSaveToggle}
+            />
+          </div>
         );
       })}
     </div>
