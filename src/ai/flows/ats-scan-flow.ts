@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Defines a Genkit flow for scanning a resume against a job description,
@@ -28,6 +27,13 @@ const AtsScanOutputSchema = z.object({
     .describe(
       "A qualitative assessment of the resume's fit for the job (e.g., Strong Fit, Good Fit, Needs Improvement)."
     ),
+  overallScore: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      'A numerical score from 0 to 100 representing the overall match quality of the resume for the job description.'
+    ),
   strengthsAnalysis: z
     .string()
     .describe(
@@ -48,6 +54,12 @@ const AtsScanOutputSchema = z.object({
     .describe(
       'A list of important keywords found in both the resume and the job description.'
     ),
+  keywordStats: z.object({
+    totalKeywordsInJobDescription: z.number().describe('The total number of unique, important keywords identified in the job description.'),
+    matchedKeywordsCount: z.number().describe('The number of important keywords from the job description found in the resume.'),
+    missingKeywordsCount: z.number().describe('The number of important keywords from the job description not found in the resume.'),
+    matchPercentage: z.number().min(0).max(100).describe('The percentage of important job description keywords found in the resume (0-100).'),
+  }).describe('Statistics related to keyword matching.'),
 });
 export type AtsScanOutput = z.infer<typeof AtsScanOutputSchema>;
 
@@ -71,12 +83,18 @@ Job Description:
 Please provide your analysis strictly in the JSON format defined by the output schema.
 The analysis should include:
 - overallFit: A qualitative assessment (e.g., Strong Fit, Good Fit, Needs Improvement).
+- overallScore: A numerical score from 0 to 100 representing the overall match quality.
 - strengthsAnalysis: A summary of strong alignments.
 - improvementSuggestions: Actionable advice for tailoring the resume.
 - missingKeywords: Important keywords from the job description missing in the resume.
 - matchingKeywords: Important keywords present in both.
+- keywordStats: An object containing:
+    - totalKeywordsInJobDescription: Total unique, important keywords in the job description.
+    - matchedKeywordsCount: Count of important job description keywords found in the resume.
+    - missingKeywordsCount: Count of important job description keywords NOT found in the resume.
+    - matchPercentage: Percentage (0-100) of important job description keywords found in the resume. Calculate this as (matchedKeywordsCount / totalKeywordsInJobDescription) * 100, rounded to the nearest integer. If totalKeywordsInJobDescription is 0, matchPercentage should be 0.
 
-Focus on extracting relevant information and providing constructive feedback. Be concise and direct in your analysis.
+Focus on extracting relevant information and providing constructive feedback. Be concise and direct in your analysis. Ensure all numerical fields are populated correctly according to their descriptions.
 `,
 });
 
@@ -94,4 +112,3 @@ const atsScanFlow = ai.defineFlow(
     return output;
   }
 );
-
